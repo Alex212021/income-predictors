@@ -2,13 +2,14 @@
 title: "About"
 ---
 
-
 My name is Aleksandar Joksic. I have a BS in psychology and MA in philosophy.
 
 Check [my GitHub account](https://github.com/Alex212021) and my [GitHub repository for this project.](https://github.com/Alex212021/income-predictors)
 
-You can reach me at aleks.joksic@gmail.com
+You can reach me at aleks.joksic\@gmail.com
 
 In this project I study the determinants of income.
 
 This project was created as a part of [Kane’s Data Science Bootcamp](https://bootcamp.davidkane.info/)
+
+![](images/clipboard-1406186297.png)

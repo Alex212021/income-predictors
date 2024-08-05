@@ -1,8 +1,6 @@
 ---
-title: "sources"
+title: "Sources used in my project"
 format: html
 ---
 
-Sources used in my project:
-
-General Social Survey, 2022
+The data was pulled from the General Social Survey (2022) using the gssr package. 

@@ -3,7 +3,7 @@ title: "Model"
 format: html
 ---
 
-Our Bayesian regression model is using the following mathematical formula
+Our Bayesian regression model is using the following mathematical formula:
 
 ```{=tex}
 \begin{align*}

@@ -1,0 +1,61 @@
+---
+title: "income_predictors"
+author: "Aleksandar Joksic"
+format: html
+---
+```{r}
+library(gssr)
+library(brms)
+library(tidybayes)
+library(gtsummary)
+library(tidyverse)
+```
+
+```{r}
+data(gss_all)
+
+data_gss <- gss_all %>%
+  filter(year == 2022) 
+
+# Prepare the data
+gss_data <- data_gss %>%
+  select(income, wordsum, race, educ, polviews, age, sex) %>%
+  filter(!is.na(income), !is.na(wordsum), !is.na(race), 
+         !is.na(educ), !is.na(polviews), !is.na(age), !is.na(sex)) %>%
+  mutate(race = factor(race),
+         polviews = factor(polviews),
+         sex = factor(sex))
+```
+
+
+
+```{r}
+# Fit the Bayesian linear regression model
+model <- brm(income ~ wordsum + race + educ + polviews + age + sex, 
+             data = gss_data, 
+             family = gaussian(),
+             prior = c(set_prior("normal(0, 5)", class = "b")), # Set a weakly informative prior
+             iter = 2000, warmup = 1000, chains = 4, cores = 4,
+             seed = 123)
+```
+
+
+```{r}
+
+# Summarize the results
+summary(model)
+
+# Tidy the model summary for easier interpretation
+model_summary <- model %>%
+  spread_draws(b_wordsum, b_race, b_educ, b_polviews, b_age, b_sex) %>%
+  median_qi(.width = c(0.95, 0.80))
+
+# Display the coefficients in a gtsummary table
+tbl <- tbl_regression(model, exponentiate = FALSE) %>%
+  add_significance_stars()
+
+# Print the table
+print(tbl)
+
+```
+

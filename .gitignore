@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+*Rproj
+*Rproj
+
+*_files
+
+rsconnect
+/_site
+/.quarto/

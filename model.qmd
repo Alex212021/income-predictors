@@ -6,8 +6,8 @@ format: html
 Our Bayesian regression model is using the following mathematical formula:
 
 ```{=tex}
-\begin{align*}
-\text{Income}_i &= \beta_0 + \beta_1 \times \text{Wordsum}_i + \beta_2 \times \text{Race}_i + \beta_3 \times \text{Education}_i \\
-&\quad + \beta_4 \times \text{PoliticalViews}_i + \beta_5 \times \text{Age}_i + \beta_6 \times \text{Gender}_i + \epsilon_i
-\end{align*}
+\begin{equation*}
+\text{Income}_i = \beta_0 + \beta_1 \times \text{Wordsum}_i + \beta_2 \times \text{Race}_i + \beta_3 \times \text{Education}_i + \beta_4 \times \text{Gender}_i + \epsilon_i
+\end{equation*}
+
 ```

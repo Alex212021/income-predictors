@@ -1,5 +1,5 @@
 ---
-title: "Determinants of Income"
+title: "Predicting Income"
 execute: 
   echo: false
   warning: false
@@ -7,7 +7,7 @@ execute:
 
 **A person's income is determined by many factors, but which are the best predictors?**
 
-To answer our question, we used the data from the General Social Survey from 2022, and the gssr package to analyze the data. We modeled income as a linear function of intelligence, race, education, political views, age, and gender. Individuals with higher levels of education and wordsum scores, and those identifying as White, were more likely to have higher incomes.
+To answer our question, we used the data from the General Social Survey from 2022, and the gssr package to analyze the data. We modeled income as a linear function of intelligence, race, education and gender. 
 
 ```{r}
 #| label: setup
@@ -28,23 +28,32 @@ data(gss_all)
 
 data_gss <- gss_all |>
   filter(year == 2022) |>
-  select(conrinc, wordsum, race, educ, polviews, age, sex) |> 
+  select(conrinc, wordsum, race, educ, sex) |> 
   mutate(
     conrinc = as.numeric(conrinc),
     wordsum = as.numeric(wordsum),
     race = as_factor(race),
     educ = as.numeric(educ),
-    polviews = as_factor(polviews),
-    age = as.numeric(age),
     sex = as_factor(sex)) |>
   drop_na()
 ```
 
 ```{r}
+data_gss |> ggplot(aes(x = educ, y = conrinc))+
+  geom_jitter(alpha = 0.1, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red", size = 1.5)+
+  labs(x = "Education (years completed)",
+       y = "Personal income (inflation-adjusted)",
+       title = "More Educated Tend To Have Higher Incomes")+
+  theme_classic()
+```
+
+
+```{r}
 #| label: model
 #| cache: true
 
-model <- brm(conrinc ~ wordsum + race + educ + polviews + age + sex, 
+model <- brm(conrinc ~ wordsum + race + educ + sex, 
              data = data_gss, 
              family = gaussian(),
              silent = 2,
@@ -61,3 +70,5 @@ model |>
 
 
 ```
+
+As the table of regression coefficients shows, individuals with higher income tend to be White, male, more educated and with higher "wordsum" scores (interpreted as "with higher IQ scores").

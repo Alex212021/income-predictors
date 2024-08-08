@@ -1,0 +1,52 @@
+---
+title: "Plots"
+execute: 
+  echo: false
+  warning: false
+---
+```{r}
+#| label: setup
+#| message: FALSE
+library(gssr)
+library(tidyverse)
+library(haven)
+library(scales)
+```
+
+
+```{r}
+
+#| label: cleaning
+#| message: FALSE 
+
+# Selecting the relevant columns and filtering out missing data
+
+data(gss_all)
+
+data_gss <- gss_all |>
+  filter(year %in% c(2010, 2012, 2014, 2016, 2018, 2022)) |>
+  select(conrinc, wordsum, race, educ, sex) |> 
+  mutate(
+    conrinc = as.numeric(conrinc),
+    wordsum = as.numeric(wordsum),
+    race = as_factor(race),
+    educ = as.numeric(educ),
+    sex = as_factor(sex)) |>
+  drop_na()
+```
+
+
+```{r}
+data_gss |> ggplot(aes(x = educ, y = conrinc))+
+  geom_jitter(alpha = 0.1, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red", size = 1.5)+
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = "Education (years completed)",
+       y = "Personal income (dollars, inflation-adjusted)",
+       title = "More Educated Tend To Have Higher Incomes")+
+  theme_classic()
+
+```
+
+
+

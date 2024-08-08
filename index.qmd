@@ -7,7 +7,7 @@ execute:
 
 **A person's income is determined by many factors, but which are the best predictors?**
 
-To answer our question, we used the 2022 data from the General Social Survey. We modeled income, a continuous outcome variable, as a linear function of education (in years completed), race, sex and intelligence (as proxied by the "wordsum" test). As the table of regression coefficients below shows, individuals with higher incomes tend to be male, more educated, White and with higher "wordsum" scores. 
+To answer our question, we used the data from the General Social Survey. We modeled income, a continuous outcome variable, as a linear function of education (in years completed), race, sex and intelligence (as proxied by the "wordsum" test). As the coefficient plot below shows, individuals with higher incomes tend to be male, more educated, White and with higher "wordsum" scores. 
 
 ```{r}
 # Load necessary packages
@@ -43,20 +43,11 @@ data_gss <- gss_all |>
   drop_na()
 ```
 
-```{r}
-data_gss |> ggplot(aes(x = educ, y = conrinc))+
-  geom_jitter(alpha = 0.1, color = "blue") +
-  geom_smooth(method = "lm", se = FALSE, color = "red", size = 1.5)+
-  scale_y_continuous(labels = scales::comma) +
-  labs(x = "Education (years completed)",
-       y = "Personal income (dollars, inflation-adjusted)",
-       title = "More Educated Tend To Have Higher Incomes")+
-  theme_classic()
-```
 
 
 ```{r}
 #| label: model
+#| cache: true
 
 
 # Fit the Bayesian linear regression model
@@ -71,15 +62,36 @@ model <- brm(conrinc ~ wordsum + race + educ + sex,
 
 ```
 
+
+
 ```{r}
-#| label: table
+#| label: coefficients-plot
+#| message: FALSE
 
-# Display the coefficients in a gtsummary table
 
+# Extract posterior samples for model coefficients
+posterior_samples <- model %>%
+  spread_draws(b_Intercept, b_wordsum, b_raceblack, b_raceother, b_educ, b_sexfemale)
 
-model |> 
-  tbl_regression()
+# Convert to data frame for plotting
+df_coefficients <- posterior_samples %>%
+  gather(key = "term", value = "estimate", b_wordsum, b_raceblack, b_raceother, b_educ, b_sexfemale) %>%
+  mutate(term = factor(term, levels = c("b_wordsum", "b_raceblack", "b_raceother", "b_educ", "b_sexfemale")))
 
+# Coefficient plot
+ggplot(df_coefficients, aes(x = term, y = estimate, fill = term)) +
+  geom_violin(trim = FALSE) +
+  geom_point(data = df_coefficients %>% group_by(term) %>% summarize(estimate = mean(estimate)), 
+             shape = 21, size = 3, color = "white", fill = "red", stroke = 1.5) +
+  coord_flip() +
+  labs(title = "Posterior Distributions of Model Coefficients",
+       x = "Coefficients",
+       y = "Estimate",
+       fill = "Coefficient") +
+  theme_minimal() +
+  theme(legend.position = "none")
 
 ```
+
+
 

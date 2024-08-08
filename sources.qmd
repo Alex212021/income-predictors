@@ -1,6 +1,6 @@
 ---
-title: "Sources used in my project"
+title: "Sources Used:"
 format: html
 ---
 
-The data was pulled from the General Social Survey (2022) using the gssr package. 
+The data was pulled from the General Social Survey using the gssr package. The data is from the following years: 2010, 2012, 2014, 2016, 2018, 2022. 

@@ -7,9 +7,11 @@ execute:
 
 **A person's income is determined by many factors, but which are the best predictors?**
 
-To answer our question, we used the data from the General Social Survey from 2022, and the gssr package to analyze the data. We modeled income as a linear function of intelligence, race, education and gender. 
+To answer our question, we used the 2022 data from the General Social Survey. We modeled income, a continuous outcome variable, as a linear function of education (in years completed), race, sex and intelligence (as proxied by the "wordsum" test). As the table of regression coefficients below shows, individuals with higher incomes tend to be male, more educated, White and with higher "wordsum" scores. 
 
 ```{r}
+# Load necessary packages
+
 #| label: setup
 #| message: FALSE
 library(gssr)
@@ -18,16 +20,19 @@ library(tidybayes)
 library(gtsummary)
 library(tidyverse)
 library(haven)
+library(scales)
 ```
 
 ```{r}
 #| label: cleaning
 #| message: FALSE 
 
+# Selecting the relevant columns and filtering out missing data
+
 data(gss_all)
 
 data_gss <- gss_all |>
-  filter(year == 2022) |>
+  filter(year %in% c(2010, 2012, 2014, 2016, 2018, 2022)) |>
   select(conrinc, wordsum, race, educ, sex) |> 
   mutate(
     conrinc = as.numeric(conrinc),
@@ -42,8 +47,9 @@ data_gss <- gss_all |>
 data_gss |> ggplot(aes(x = educ, y = conrinc))+
   geom_jitter(alpha = 0.1, color = "blue") +
   geom_smooth(method = "lm", se = FALSE, color = "red", size = 1.5)+
+  scale_y_continuous(labels = scales::comma) +
   labs(x = "Education (years completed)",
-       y = "Personal income (inflation-adjusted)",
+       y = "Personal income (dollars, inflation-adjusted)",
        title = "More Educated Tend To Have Higher Incomes")+
   theme_classic()
 ```
@@ -51,7 +57,10 @@ data_gss |> ggplot(aes(x = educ, y = conrinc))+
 
 ```{r}
 #| label: model
-#| cache: true
+
+
+# Fit the Bayesian linear regression model
+
 
 model <- brm(conrinc ~ wordsum + race + educ + sex, 
              data = data_gss, 
@@ -65,10 +74,12 @@ model <- brm(conrinc ~ wordsum + race + educ + sex,
 ```{r}
 #| label: table
 
+# Display the coefficients in a gtsummary table
+
+
 model |> 
   tbl_regression()
 
 
 ```
 
-As the table of regression coefficients shows, individuals with higher income tend to be White, male, more educated and with higher "wordsum" scores (interpreted as "with higher IQ scores").

@@ -1,6 +1,9 @@
 ---
 title: "Model"
 format: html
+execute: 
+  echo: false
+  warning: false
 ---
 
 Our Bayesian regression model is using the following mathematical formula:
@@ -9,5 +12,78 @@ Our Bayesian regression model is using the following mathematical formula:
 \begin{equation*}
 \text{Income}_i = \beta_0 + \beta_1 \times \text{Wordsum}_i + \beta_2 \times \text{Race}_i + \beta_3 \times \text{Education}_i + \beta_4 \times \text{Gender}_i + \epsilon_i
 \end{equation*}
-
 ```
+Table showing parameter estimates:
+
+```{r}
+#| label: setup
+#| message: FALSE
+library(gssr)
+library(brms)
+library(tidybayes)
+library(gtsummary)
+library(tidyverse)
+library(haven)
+
+#| label: cleaning
+#| message: FALSE 
+
+# Selecting the relevant columns and filtering out missing data
+
+data(gss_all)
+
+data_gss <- gss_all |>
+  filter(year %in% c(2010, 2012, 2014, 2016, 2018, 2022)) |>
+  select(conrinc, wordsum, race, educ, sex) |> 
+  mutate(
+    conrinc = as.numeric(conrinc),
+    wordsum = as.numeric(wordsum),
+    race = as_factor(race),
+    educ = as.numeric(educ),
+    sex = as_factor(sex)) |>
+  drop_na()
+
+
+# Fit the Bayesian linear regression model
+
+
+model <- brm(conrinc ~ wordsum + race + educ + sex, 
+             data = data_gss, 
+             family = gaussian(),
+             silent = 2,
+             refresh = 0,
+             seed = 123)
+
+
+# Display the coefficients in a gtsummary table
+
+
+model |> 
+  tbl_regression()
+```
+
+The coefficients are interpreted as follows:
+
+1.  **wordsum (1,766; 95% CI: 1,235 to 2,305)**:
+
+    -   A unit increase in the wordsum score is associated with an average increase of 1,766 units in income. The credible interval does not include zero, indicating a clear positive correlation between wordsum scores and income.
+
+2.  **Race**:
+
+    -   **Black (-5,335; 95% CI: -7,843 to -2,834)**: Being Black, compared to White (the reference category), is associated with an average decrease of 5,335 units in income. The credible interval not including zero strongly suggests that being Black correlates with lower income levels compared to being White.
+
+    -   **Other (-327; 95% CI: -3,340 to 2,646)**: Being of another race (not White or Black) is associated with a slight average decrease of 327 units in income compared to Whites. However, the credible interval includes zero, indicating that this effect is uncertain, and the true effect might be negligible or variable.
+
+3.  **educ (4,259; 95% CI: 3,915 to 4,606)**:
+
+    -   A unit increase in education level is associated with an average increase of 4,259 units in income. The narrow credible interval not including zero indicates a robust positive effect of education on income.
+
+4.  **Sex**:
+
+    -   **Female (-15,824; 95% CI: -17,659 to -14,012)**: Being female, compared to male, is associated with an average decrease of 15,824 units in income. The credible interval not including zero indicates a clear negative correlation between being female and income levels.
+
+**Summary**:
+
+-   Variables such as wordsum scores and education levels demonstrate clear positive effects on income, suggesting that cognitive abilities and higher education contribute beneficially to income.
+
+-   Being female or Black correlates with lower income levels compared to being male or White, respectively.
